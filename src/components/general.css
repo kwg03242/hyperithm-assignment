@@ -1,0 +1,47 @@
+.row{
+    display: flex;
+    flex-direction: row;
+}
+
+.background{
+    margin-left: 10%;
+    margin-right: 10%;
+    margin-top: 10%;
+    margin-bottom: 10%;
+}
+
+.title{
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.right-end{
+    margin-left: auto;
+    width: 100%;
+}
+
+.trade-log{
+    display: flex;
+    flex-direction: row;
+    width: 250px;
+    margin-right: 20px;
+}
+
+.trade-log-date{
+    width: 150px;
+}
+
+.trade-log-side{
+    width: 30px;
+}
+
+.trade-log-volume{
+    margin-left: auto;
+}
+
+.trade-log-wrapper{
+    margin-left: 10%;
+    margin-right: 10%;
+    width: 80%;
+}
