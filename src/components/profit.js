@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { profitClass } from '../classes/logClass'
 import { priceLoader } from '../dataLoader/dataLoader';
 import { priceLogClass } from '../classes/logClass';
-import { Chart } from './chart';
+import { ProfitChart, BTCValueChart } from './chart';
 
 const millisecPerDay = 1000 * 60 * 60 * 24;
 const unitTime = millisecPerDay;
@@ -65,7 +65,8 @@ export default function Profit( { logs = [] } ) {
             {/* {profits.length > 0 &&
                 profits.map((profit) => profit.print())
             } */}
-            <Chart profits={profits} />
+            <ProfitChart profits={profits} />
+            <BTCValueChart prices={prices} />
             <div>손익</div>
         </section>
     );

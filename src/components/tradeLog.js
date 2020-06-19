@@ -128,7 +128,7 @@ export default function TradeLog () {
                                         <input type="text" onChange={(e) => setEditTrade(prev => {console.log(e.target);prev[idx - 10 * currentPage].side = e.target.value; return prev;})} />
                                         <label>개수:</label>
                                         <input type="text" onChange={(e) => setEditTrade(prev => {console.log(e.target);prev[idx - 10 * currentPage].volume = Number(e.target.value); return prev;})} />
-                                        <input type="submit" value={idx} />
+                                        <input type="submit" value={"수정하기"} />
                                     </form>
                                 </>  
                             );
