@@ -2,8 +2,7 @@ import React from 'react';
 
 export class tradeLogClass {
     constructor (time, side, volume, idx){
-        let timeArray = time.split('/');
-        this.date = new Date(timeArray[2], timeArray[0] - 1, timeArray[1]);
+        this.date = time;
         this.side = side;
         this.volume = volume;
         this.idx = idx;
@@ -20,8 +19,7 @@ export class tradeLogClass {
 
 export class priceLogClass {
     constructor (date, coin, price, volume){
-        let dateArray = date.split('-');
-        this.date = new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
+        this.date = date;
         this.coin = coin;
         this.price = parseInt(price, 10);
         this.volume = volume;

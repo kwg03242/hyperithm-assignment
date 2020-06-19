@@ -8,22 +8,12 @@ const millisecPerDay = 1000 * 60 * 60 * 24;
 const unitTime = millisecPerDay;
 
 
-export default function Profit( { logs = [] } ) {
+
+export default function Profit( { logs = [], prices = [] } ) {
     var cloneDeep = require('lodash.clonedeep');
     const [currentCash, setCurrentCash] = useState(0);
     const [currentBtc, setCurrentBtc] = useState(0);
     const [profits, setProfits] = useState([]);
-
-    const [prices, setPrices] = useState([]);
-
-    
-
-    useEffect (() => {
-        let priceLogs = priceLoader();
-        let sortedPrices = priceLogs.map((log) => new priceLogClass(log.Date, log.Coin, log.Price, log.Volume));
-        sortedPrices.sort((a, b) => a.date - b.date);
-        setPrices(sortedPrices);  
-    }, [])
 
     useEffect(() => {
         let sortedLogs = cloneDeep(logs);
@@ -55,7 +45,9 @@ export default function Profit( { logs = [] } ) {
 
             profits.push(new profitClass(prices[i].date, btc, cash, btc * prices[i].price + cash));
             if(prices[i].date.getTime() === prices[0].date.getTime() + k * unitTime)i++;
+            
         }
+        console.log(logs);
         setProfits(profits);
     }, [logs, prices])
 

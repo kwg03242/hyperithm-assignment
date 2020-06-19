@@ -2,6 +2,9 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Missing bitcoin_price data while (2019.03.20~2019.03.31)
 
+## Backlog
+AvailableDate function select bug
+
 ## Available Scripts
 
 In the project directory, you can run:

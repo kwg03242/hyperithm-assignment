@@ -23,8 +23,10 @@ export function ProfitChart( { profits = [] } ) {
                     .domain(d3.extent(data, d => d.date))
                     .range([margin.left, width - margin.right]);
 
+                let absMax = Math.abs(d3.min(data, d => d.value)) > Math.abs(d3.max(data, d => d.value))? Math.abs(d3.min(data, d => d.value)):Math.abs(d3.max(data, d => d.value));
+
                 let y = d3.scaleLinear()
-                    .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)]).nice()
+                    .domain([d3.min(data, d => d.value) < 0? -absMax:0, absMax]).nice()
                     .range([height - margin.bottom, margin.top]);
                 let xAxis = g => g
                     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -64,6 +66,7 @@ export function ProfitChart( { profits = [] } ) {
             }
 
             else{
+                console.log("chart");
                 let data = Object.assign(profits.map(({date, profit}) => ({date, value: profit})), {y: "$"});
                 let line = d3.line()
                     .defined(d => !isNaN(d.value))
@@ -74,8 +77,10 @@ export function ProfitChart( { profits = [] } ) {
                     .domain(d3.extent(data, d => d.date))
                     .range([margin.left, width - margin.right]);
 
+                let absMax = Math.abs(d3.min(data, d => d.value)) > Math.abs(d3.max(data, d => d.value))? Math.abs(d3.min(data, d => d.value)):Math.abs(d3.max(data, d => d.value));
+
                 let y = d3.scaleLinear()
-                    .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)]).nice()
+                    .domain([d3.min(data, d => d.value) < 0? -absMax:0, absMax]).nice()
                     .range([height - margin.bottom, margin.top]);
 
                 let yAxis = g => g
@@ -89,8 +94,6 @@ export function ProfitChart( { profits = [] } ) {
                         .text(data.y));
 
                 const svg = d3.select(d3Container.current);
-                
-                console.log(svg.select("g").node());
 
                 svg.select("g")
                     .call(yAxis);
@@ -109,7 +112,6 @@ export function ProfitChart( { profits = [] } ) {
 
 export function BTCValueChart( { prices = [] } ) {
     const d3Container = useRef(null);
-    const [loaded, setLoaded] = useState(false);
 
     useEffect(() => {
         if (prices.length > 0 && d3Container.current) {           
@@ -124,7 +126,7 @@ export function BTCValueChart( { prices = [] } ) {
                     .range([margin.left, width - margin.right]);
 
                 let y = d3.scaleLinear()
-                    .domain([d3.min(data, d => d.value), d3.max(data, d => d.value)]).nice()
+                    .domain([0, d3.max(data, d => d.value)]).nice()
                     .range([height - margin.bottom, margin.top]);
                 let xAxis = g => g
                     .attr("transform", `translate(0,${height - margin.bottom})`)
@@ -159,8 +161,6 @@ export function BTCValueChart( { prices = [] } ) {
 
                 svg.append("g")
                     .call(xAxis);
-
-                setLoaded(true);
         }
     }, [prices])
     
