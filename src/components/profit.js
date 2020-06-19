@@ -1,18 +1,14 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { profitClass } from '../classes/logClass'
-import { priceLoader } from '../dataLoader/dataLoader';
-import { priceLogClass } from '../classes/logClass';
-import { ProfitChart, BTCValueChart } from './chart';
+import { ProfitChart, BTCValueChart, BarChart } from './chart';
 
 const millisecPerDay = 1000 * 60 * 60 * 24;
 const unitTime = millisecPerDay;
 
-
-
 export default function Profit( { logs = [], prices = [] } ) {
     var cloneDeep = require('lodash.clonedeep');
-    const [currentCash, setCurrentCash] = useState(0);
-    const [currentBtc, setCurrentBtc] = useState(0);
+    const currentCash = 0;
+    const currentBtc = 0;
     const [profits, setProfits] = useState([]);
 
     useEffect(() => {
@@ -45,20 +41,16 @@ export default function Profit( { logs = [], prices = [] } ) {
 
             profits.push(new profitClass(prices[i].date, btc, cash, btc * prices[i].price + cash));
             if(prices[i].date.getTime() === prices[0].date.getTime() + k * unitTime)i++;
-            
         }
-        console.log(logs);
+
         setProfits(profits);
     }, [logs, prices])
 
-    // console.log(profits);
     return (
-        <section>
-            {/* {profits.length > 0 &&
-                profits.map((profit) => profit.print())
-            } */}
+        <section className="background">
             <ProfitChart profits={profits} />
             <BTCValueChart prices={prices} />
+            <BarChart prices={prices} />
             <div>손익</div>
         </section>
     );

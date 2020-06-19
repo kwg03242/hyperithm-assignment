@@ -1,17 +1,20 @@
 import React from 'react';
 
 export class tradeLogClass {
-    constructor (time, side, volume, idx){
+    constructor (time, side, volume, unit, idx){
         this.date = time;
         this.side = side;
         this.volume = volume;
+        this.unit = unit;
         this.idx = idx;
     }
   
     print = () => {
         return (
-            <li>
-                {this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()} {this.side} {this.volume}
+            <li className="trade-log">
+                <div className="trade-log-date">{this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()}</div>
+                <div className="trade-log-side">{this.side}</div> 
+                <div className="trade-log-volume">{this.volume} {this.unit}</div>
             </li>
         );
     }
