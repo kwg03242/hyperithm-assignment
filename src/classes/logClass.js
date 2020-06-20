@@ -10,7 +10,7 @@ export class tradeLogClass {
         this.idx = idx;
     }
   
-    print = () => {
+    print() {console.log(this.volume);
         return (
             <li className="trade-log">
                 <div className="trade-log-date">{this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()}</div>

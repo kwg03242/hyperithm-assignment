@@ -104,22 +104,23 @@ export default function TradeLog () {
     }
 
     const onEdit = (idx) =>{
+        if(idx !== -1)setEditTrade(prev => {prev.date = logs[idx].date; prev.side = logs[idx].side; prev.volume = logs[idx].volume; return prev;})
         setEditIdx(idx);
     }
 
     const onEditDate = (date) =>{
-        console.log(date);
         setEditTrade(prev => {prev.date = new Date(priceDateFormatting(date)); return prev;})
     }
 
     const onEditConfirm = (e) =>{
         e.preventDefault();
         if(window.confirm("수정하시겠습니까?")){
-            if(editTrade.date != null && editTrade.side != null && editTrade.volume != null){
+            if(editTrade.date != null && editTrade.side != '' && editTrade.volume != null && !isNaN(editTrade.volume) && editTrade.volume[0] !== '-'){
                 let prevLogs = logs;
                 prevLogs[Number(e.target.value)].date = editTrade.date;
                 prevLogs[Number(e.target.value)].side = editTrade.side;
-                prevLogs[Number(e.target.value)].volume = editTrade.volume;
+                prevLogs[Number(e.target.value)].volume = Number(editTrade.volume);
+                prevLogs.sort((a, b) => b.date - a.date);
                 for(let i = 0; i < prevLogs.length; i++){
                     prevLogs[i].idx = i;
                 }
@@ -131,6 +132,7 @@ export default function TradeLog () {
             }
         }
     }  
+    console.log(logs)
 
     return (
         <>
@@ -158,27 +160,24 @@ export default function TradeLog () {
                                         {idx !== editIdx &&
                                             <div className="row">
                                                 {log.print()}
-                                                <div onClick={() => onDelete(idx)} value={idx} className="pointer"><TiDelete /></div>
-                                                <div onClick={() => onEdit(idx)} value={idx} className="pointer"><TiEdit /></div>
+                                                <div>{log.volume}</div>
+                                                <div onClick={() => onDelete(idx)} className="pointer"><TiDelete /></div>
+                                                <div onClick={() => onEdit(idx)} className="pointer"><TiEdit /></div>
                                             </div>
                                         }
                                         {idx === editIdx &&
                                             <div className="row">
-                                                <li className="trade-log">
-                                                    <form className="row">
-                                                        <div className="trade-log-date">
-                                                            <input type="date" onChange={e => onEditDate(e.target.value)} defaultValue={dateToISOString(logs[idx].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
-                                                        </div>    
-                                                        <select onChange={(e) => setEditTrade(prev => {prev.side = e.target.value; return prev;})} defaultValue={logs[idx].side}>
-                                                            <option value="">거래내용</option>
-                                                            <option value="buy">구매</option>
-                                                            <option value="sell">판매</option>
-                                                        </select>
-                                                        <input type="text" onChange={(e) => setEditTrade(prev => {prev.volume = Number(e.target.value); return prev;})} size="6" defaultValue={logs[idx].volume}/>
-                                                    </form>
-                                                </li>
+                                                <form>
+                                                    <input type="date" onChange={e => {onEditDate(e.target.value);}} defaultValue={dateToISOString(logs[idx].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                                    <select onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.side = value; return prev;});}} defaultValue={logs[idx].side}>
+                                                        <option value="">거래내용</option>
+                                                        <option value="buy">구매</option>
+                                                        <option value="sell">판매</option>
+                                                    </select>
+                                                    <input type="text" onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.volume = value; return prev;});}} size="6" defaultValue={logs[idx].volume}/>
+                                                </form>
                                                 <button onClick={onEditConfirm} value={idx}>확인</button>
-                                                <button onClick={onEdit} value={-1}>취소</button>
+                                                <button onClick={() => onEdit(-1)}>취소</button>
                                             </div>
                                         }
                                     </>
