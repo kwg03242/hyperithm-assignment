@@ -35,6 +35,10 @@ export default function TradeLog () {
     const [prices, setPrices] = useState([]);
     const [numberOfLogPerPage, setNumberOfLogPerPage] = useState(10);
     const [editIdx, setEditIdx] = useState(-1);
+    const [startPoint, setStartPoint] = useState(0);
+    const [endPoint, setEndPoint] = useState(0);
+    const [startIdx, setStartIdx] = useState(0);
+    const [endIdx, setEndIdx] =useState(0);
 
     useEffect (() => {
         let idx = 0;
@@ -50,7 +54,33 @@ export default function TradeLog () {
         let sortedPrices = priceLogs.map((log) => new priceLogClass(priceDateFormatting(log.Date), log.Coin, log.Price, log.Volume));
         sortedPrices.sort((a, b) => a.date - b.date);
         setPrices(sortedPrices);  
+
+        setStartPoint(sortedPrices[0].date);
+        setEndPoint(sortedPrices[sortedPrices.length - 1].date);
     }, [])
+
+    useEffect (() => {
+        let begin = 0;
+        let end = logs.length - 1;
+
+        for(let i = 0; i < logs.length; i++){
+            if(logs[i].date - endPoint <= 0){
+                setStartIdx(i);console.log(logs[i].date, endPoint);
+                break;
+            }
+        }
+
+        for(let i = logs.length - 1; i > -1; i--){
+            if(logs[i].date - startPoint >= 0){
+                setEndIdx(i);
+                break;
+            }
+        }       
+    }, [startPoint, endPoint, logs])
+
+    useEffect(() => {
+        setMaxPage(Math.ceil((endIdx - startIdx) / numberOfLogPerPage));
+    }, [startIdx, endIdx, numberOfLogPerPage])
     
     const onPrev = () =>{
         if(currentPage > 0){
@@ -100,7 +130,7 @@ export default function TradeLog () {
     }
 
     const onDate = (date) =>{
-        setAddTrade(prev => {prev.date = new Date(priceDateFormatting(date)); return prev;})
+        setAddTrade(prev => {prev.date = new priceDateFormatting(date); return prev;})
     }
 
     const onEdit = (idx) =>{
@@ -109,7 +139,7 @@ export default function TradeLog () {
     }
 
     const onEditDate = (date) =>{
-        setEditTrade(prev => {prev.date = new Date(priceDateFormatting(date)); return prev;})
+        setEditTrade(prev => {prev.date = priceDateFormatting(date); return prev;})
     }
 
     const onEditConfirm = (e) =>{
@@ -132,35 +162,44 @@ export default function TradeLog () {
             }
         }
     }  
-    console.log(logs)
 
     return (
         <>
             <section className="background">
                 <div className="trade-log-wrapper">
                     <div className="title">매매 기록</div>
-                    <label>표시 개수 
-                        <select onChange={(e) => {
-                            if(currentPage * Number(e.target.value) > logs.length - 1){setCurrentPage(Math.floor((logs.length - 1) / Number(e.target.value)))};
-                            setNumberOfLogPerPage(Number(e.target.value));
-                            setMaxPage(Math.floor((logs.length - 1) / Number(e.target.value)) + 1);
-                        }}>
-                            <option value={5}>5개</option>
-                            <option value={10} selected>10개</option>
-                            <option value={15}>15개</option>
-                            <option value={20}>20개</option>
-                        </select>
-                    </label>
+                    <div className="row">
+                        <label>표시 개수 
+                            <select onChange={(e) => {
+                                if(currentPage * Number(e.target.value) > logs.length - 1){setCurrentPage(Math.floor((logs.length - 1) / Number(e.target.value)))};
+                                setNumberOfLogPerPage(Number(e.target.value));
+                            }}>
+                                <option value={5}>5개</option>
+                                <option value={10} selected>10개</option>
+                                <option value={15}>15개</option>
+                                <option value={20}>20개</option>
+                            </select>
+                        </label>
+                        {prices.length > 0 &&
+                            <>
+                                <label>조회 시작 날짜 
+                                    <input type="date" onChange={e => {setStartPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                </label>
+                                <label>조회 마지막 날짜
+                                    <input type="date" onChange={e => {setEndPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                </label>
+                            </>
+                        }
+                    </div>
                     <ul>
                         {logs.length > 0 &&
-                            logs.slice(currentPage * numberOfLogPerPage, currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
+                            logs.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? startIdx + endIdx : startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
                                 let idx = log.idx;
                                 return (
                                     <>
                                         {idx !== editIdx &&
                                             <div className="row">
                                                 {log.print()}
-                                                <div>{log.volume}</div>
                                                 <div onClick={() => onDelete(idx)} className="pointer"><TiDelete /></div>
                                                 <div onClick={() => onEdit(idx)} className="pointer"><TiEdit /></div>
                                             </div>
