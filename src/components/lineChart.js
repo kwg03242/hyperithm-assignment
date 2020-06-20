@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-export function LineChart( { logs = [], text = '' } ) {
+export function LineChart( { logs = [], text = '', width = 800, height = 350 } ) {
     let data = [];
 
     const [btcData, setBtcData] = useState([{
@@ -124,7 +124,7 @@ export function LineChart( { logs = [], text = '' } ) {
 
     return (
         <div id="chart">
-            <ReactApexChart options={optionOfBTCChart} series={btcData} type="line" height={350} width={800} />
+            <ReactApexChart options={optionOfBTCChart} series={btcData} type="line" height={height} width={width} />
         </div>
     );
 }

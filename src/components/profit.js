@@ -1,15 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { profitClass } from '../classes/logClass'
-import { ProfitChart, BTCValueChart, BarChart } from './chart';
+import { ProfitChart } from './chart';
+import { LineChart } from './lineChart';
 
 const millisecPerDay = 1000 * 60 * 60 * 24;
 const unitTime = millisecPerDay;
 
 export default function Profit( { logs = [], prices = [] } ) {
     var cloneDeep = require('lodash.clonedeep');
-    const currentCash = 0;
-    const currentBtc = 0;
+    const initialCash = 0;
+    const initialBtc = 40;
     const [profits, setProfits] = useState([]);
+    const [chartData, setChartData] = useState([]);
+    const [currentBtc, setCurrentBtc] = useState(initialBtc);
+    const [currentCash, setCurrentCash] = useState(initialCash);
 
     useEffect(() => {
         let sortedLogs = cloneDeep(logs);
@@ -25,7 +29,7 @@ export default function Profit( { logs = [], prices = [] } ) {
         }
         let j = 0;
         let i = 0;
-
+        
         for(let k = 0; k < duration; k++){
             while(sortedLogs.length > j && sortedLogs[j].date.getTime() === prices[i].date.getTime()){
                 if(sortedLogs[j].side === 'sell'){
@@ -39,19 +43,19 @@ export default function Profit( { logs = [], prices = [] } ) {
                 j++;
             }
 
-            profits.push(new profitClass(prices[i].date, btc, cash, btc * prices[i].price + cash));
+            profits.push(new profitClass(prices[i].date, btc, cash, btc * prices[i].price + cash - initialBtc * prices[0].price - initialCash));
             if(prices[i].date.getTime() === prices[0].date.getTime() + k * unitTime)i++;
         }
 
         setProfits(profits);
+        setChartData(profits.map(profit => {return {"date": profit.date, "price": profit.profit}}))
     }, [logs, prices])
 
     return (
-        <section className="background">
-            <ProfitChart profits={profits} />
-            <BTCValueChart prices={prices} />
-            <BarChart prices={prices} />
-            <div>손익</div>
+        <section className="chart-section">
+            <div className="center">
+                <LineChart logs={chartData} text="수익"/>
+            </div>
         </section>
     );
 }

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
 import { tradeLogLoader, priceLoader } from '../dataLoader/dataLoader';
 import { tradeLogClass, priceLogClass } from '../classes/logClass'
 import { AvailableDate } from './availableDate'
@@ -38,7 +39,7 @@ export default function TradeLog () {
     useEffect (() => {
         let idx = 0;
         let tradeLogs = tradeLogLoader(); 
-        let unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "BTC", 0));
+        let unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0));
         unpagedLogs.sort((a, b) => b.date - a.date);
         for(let i = 0; i < unpagedLogs.length; i++){
             unpagedLogs[i].idx = idx++;
@@ -67,11 +68,10 @@ export default function TradeLog () {
         if(e.target.value < maxPage - 1 && e.target.value > 0)setCurrentPage(() => e.target.value - 1);
     }
 
-    const onDelete = (e) =>{
-        e.preventDefault();
+    const onDelete = (idx) =>{
         if(window.confirm("삭제하시겠습니까?")){
             let prevLogs = logs;
-            prevLogs.splice(e.target.value, 1);
+            prevLogs.splice(idx, 1);
             for(let i = 0; i < prevLogs.length; i++){
                 prevLogs[i].idx = i;
             }
@@ -80,50 +80,57 @@ export default function TradeLog () {
         }
     }
 
-    const onAdd = (e) =>{
-        e.preventDefault();
+    const onAdd = () =>{
         if(addTrade.date != null && addTrade.side != null && addTrade.volume != null){
-            let prevLogs = logs;
-            console.log(addTrade.volume, typeof(addTrade.volume))
-            prevLogs.push(new tradeLogClass (addTrade.date, addTrade.side, addTrade.volume, "BTC", 0));
-            prevLogs.sort((a, b) => b.date - a.date);
-            for(let i =0; i < prevLogs.length; i++){
-                prevLogs[i].idx = i;
+            if(window.confirm("추가하시겠습니까?")){
+                let prevLogs = logs;
+
+                prevLogs.push(new tradeLogClass (addTrade.date, addTrade.side, addTrade.volume, "Bitcoin", 0));
+                prevLogs.sort((a, b) => b.date - a.date);
+                for(let i =0; i < prevLogs.length; i++){
+                    prevLogs[i].idx = i;
+                }
+                setLogs(cloneDeep(prevLogs));
+                setMaxPage(Math.floor((prevLogs.length - 1) / numberOfLogPerPage) + 1);
             }
-            setLogs(cloneDeep(prevLogs));
-            setMaxPage(Math.floor((prevLogs.length - 1) / numberOfLogPerPage) + 1);
         }
         else {
-            window.location.alert("invalidate data");
+            window.alert("invalidate data");
         }
     }
 
     const onDate = (date) =>{
-        setAddTrade(prev => {prev.date = date; return prev;})
+        setAddTrade(prev => {prev.date = new Date(priceDateFormatting(date)); return prev;})
     }
 
-    const onEdit = (e) =>{
-        setEditIdx(Number(e.target.value));
+    const onEdit = (idx) =>{
+        setEditIdx(idx);
     }
 
     const onEditDate = (date) =>{
-        setEditTrade(prev => {prev.date = date; return prev;})
+        console.log(date);
+        setEditTrade(prev => {prev.date = new Date(priceDateFormatting(date)); return prev;})
     }
 
     const onEditConfirm = (e) =>{
         e.preventDefault();
         if(window.confirm("수정하시겠습니까?")){
-            let prevLogs = logs;
-            prevLogs[Number(e.target.value)].date = editTrade.date;
-            prevLogs[Number(e.target.value)].side = editTrade.side;
-            prevLogs[Number(e.target.value)].volume = editTrade.volume;
-            for(let i = 0; i < prevLogs.length; i++){
-                prevLogs[i].idx = i;
+            if(editTrade.date != null && editTrade.side != null && editTrade.volume != null){
+                let prevLogs = logs;
+                prevLogs[Number(e.target.value)].date = editTrade.date;
+                prevLogs[Number(e.target.value)].side = editTrade.side;
+                prevLogs[Number(e.target.value)].volume = editTrade.volume;
+                for(let i = 0; i < prevLogs.length; i++){
+                    prevLogs[i].idx = i;
+                }
+                setLogs(cloneDeep(prevLogs));
+                setEditIdx(-1);
             }
-            setLogs(cloneDeep(prevLogs));
-            setEditIdx(-1);
+            else {
+                window.alert("invalidate data");
+            }
         }
-    }
+    }  
 
     return (
         <>
@@ -151,22 +158,24 @@ export default function TradeLog () {
                                         {idx !== editIdx &&
                                             <div className="row">
                                                 {log.print()}
-                                                <button onClick={onDelete} value={idx}>삭제하기</button>
-                                                <button onClick={onEdit} value={idx}>수정하기</button>
+                                                <div onClick={() => onDelete(idx)} value={idx} className="pointer"><TiDelete /></div>
+                                                <div onClick={() => onEdit(idx)} value={idx} className="pointer"><TiEdit /></div>
                                             </div>
                                         }
                                         {idx === editIdx &&
                                             <div className="row">
                                                 <li className="trade-log">
-                                                    <AvailableDate begin={prices[0].date} end={prices[prices.length - 1].date} onSubmit={onEditDate} />
-                                                    <label>거래내용:</label>
-                                                    <select onChange={(e) => setEditTrade(prev => {prev.side = e.target.value; return prev;})}>
-                                                        <option value="">거래내용</option>
-                                                        <option value="buy">구매</option>
-                                                        <option value="sell">판매</option>
-                                                    </select>
-                                                    <label>개수:</label>
-                                                    <input type="text" onChange={(e) => setEditTrade(prev => {prev.volume = Number(e.target.value); return prev;})} />
+                                                    <form className="row">
+                                                        <div className="trade-log-date">
+                                                            <input type="date" onChange={e => onEditDate(e.target.value)} defaultValue={dateToISOString(logs[idx].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                                        </div>    
+                                                        <select onChange={(e) => setEditTrade(prev => {prev.side = e.target.value; return prev;})} defaultValue={logs[idx].side}>
+                                                            <option value="">거래내용</option>
+                                                            <option value="buy">구매</option>
+                                                            <option value="sell">판매</option>
+                                                        </select>
+                                                        <input type="text" onChange={(e) => setEditTrade(prev => {prev.volume = Number(e.target.value); return prev;})} size="6" defaultValue={logs[idx].volume}/>
+                                                    </form>
                                                 </li>
                                                 <button onClick={onEditConfirm} value={idx}>확인</button>
                                                 <button onClick={onEdit} value={-1}>취소</button>
@@ -180,26 +189,35 @@ export default function TradeLog () {
                             <div>거래 내역이 없습니다.</div>
                         }
                     </ul>
-                    <button onClick={onPrev}>뒤로</button>
-                    <button onClick={onNext}>앞으로</button>
-                    <form onSubmit={onAdd}>
-                        <label>날짜:</label>
-                        {prices.length > 0 &&
-                            <AvailableDate begin={prices[0].date} end={prices[prices.length - 1].date} onSubmit={onDate}/>
-                        }
-                        <label>거래내용:</label>
-                        <select onChange={(e) => setAddTrade(prev => {prev.side = e.target.value; return prev;})}>
-                            <option value="">거래내용</option>
-                            <option value="buy">구매</option>
-                            <option value="sell">판매</option>
-                        </select>
-                        <label>개수:</label>
-                        <input type="text" onChange={(e) => setAddTrade(prev => {prev.volume = Number(e.target.value); return prev;})} />
-                        <input type="submit" value="거래 내역 추가" />
+                    <div className="row">
+                        <div onClick={onPrev} className="pointer"><TiArrowLeftThick /></div>
+                        <div onClick={onNext} className="pointer"><TiArrowRightThick /></div>
+                    </div>
+                    <form>
+                        <div className="row">
+                            <label>날짜:</label>
+                            {prices.length > 0 &&
+                                <input onChange={e => onDate(e.target.value)} type="date" defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                            }
+                            <label>거래내용:</label>
+                            <select onChange={(e) => setAddTrade(prev => {prev.side = e.target.value; return prev;})}>
+                                <option value="">거래내용</option>
+                                <option value="buy">구매</option>
+                                <option value="sell">판매</option>
+                            </select>
+                            <label>개수:</label>
+                            <input type="text" onChange={(e) => setAddTrade(prev => {prev.volume = Number(e.target.value); return prev;})} size="6" />
+                            <div className="pointer" onClick={onAdd}><TiPlus /></div>
+                        </div>
                     </form>
                 </div>
             </section>
-            <Profit logs={logs} prices={prices}/>
+            <Profit logs={logs} prices={prices} />
         </>
     );
+}
+
+const dateToISOString = (date) =>{
+    let out = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    return out.toISOString().slice(0, 10);
 }

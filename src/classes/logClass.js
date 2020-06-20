@@ -1,11 +1,12 @@
 import React from 'react';
+import { coinToUnit } from '../functions/coinToUnit'
 
 export class tradeLogClass {
-    constructor (time, side, volume, unit, idx){
+    constructor (time, side, volume, coin, idx){
         this.date = time;
         this.side = side;
         this.volume = volume;
-        this.unit = unit;
+        this.coin = coin;
         this.idx = idx;
     }
   
@@ -14,7 +15,7 @@ export class tradeLogClass {
             <li className="trade-log">
                 <div className="trade-log-date">{this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()}</div>
                 <div className="trade-log-side">{this.side}</div> 
-                <div className="trade-log-volume">{this.volume} {this.unit}</div>
+                <div className="trade-log-volume">{this.volume} {coinToUnit(this.coin)}</div>
             </li>
         );
     }
