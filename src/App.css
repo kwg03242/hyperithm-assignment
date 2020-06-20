@@ -1,0 +1,35 @@
+.menu-section{
+    height: 100px;
+}
+
+.chart-section{
+    display: flex;
+    align-content: center;
+    flex-direction: column;
+}
+
+.chart-section.hide {
+    opacity: 0;
+    pointer-events:none;
+  }
+
+.full-width{
+    width: 100%;
+}
+
+.center{
+    margin-right: auto;
+    margin-left: auto;
+    text-align: center;
+}
+
+.fadeOut{
+    opacity:0;
+    width:0;
+    height:0;
+}
+.fadeIn{
+    opacity:1;
+    transition: width 0.5s, height 0.5s, opacity 0.5s 0.5s;
+
+}
