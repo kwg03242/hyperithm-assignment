@@ -53,6 +53,7 @@ input{
 }
 
 .trade-log-wrapper{
+    background-color: #f6fff7;
     border-radius: 15px;
     width: 800px;
     margin-left: auto;
@@ -65,4 +66,20 @@ input{
 
 .pointer{
     cursor: pointer;
+}
+
+.date-of-profit{
+    width: 150px;
+}
+
+.btc-of-profit{
+    width: 200px;
+}
+
+.usd-of-profit{
+    width: 200px;
+}
+
+.profit-of-profit{
+    width: 190px;
 }

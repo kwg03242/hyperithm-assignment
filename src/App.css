@@ -23,6 +23,7 @@
 }
 
 .chart-section{
+    background-color: #f6fff7;
     border-radius: 15px;
     width: 800px;
     display: flex;

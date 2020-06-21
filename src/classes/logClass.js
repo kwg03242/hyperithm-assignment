@@ -48,9 +48,17 @@ export class profitClass {
 
     print = () => {
         return (
-            <li>
-                {this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()} BTC: {this.btc} USD: {this.cash} Profit: {this.profit}
-            </li>
+                <div className="row">
+                    <div className="date-of-profit">{dateToISOString(this.date).slice(0, 10)}</div>
+                    <div className="btc-of-profit">보유 Bitcoin: {new Intl.NumberFormat().format(this.btc)} BTC</div>
+                    <div className="usd-of-profit">보유 현금: {new Intl.NumberFormat().format(this.cash)} $</div>
+                    <div className="profit-of-profit">Profit: {new Intl.NumberFormat().format(this.profit)} $</div>
+                </div>
         );
     }
+}
+
+const dateToISOString = (date) =>{
+    let out = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    return out.toISOString().slice(0, 10);
 }
