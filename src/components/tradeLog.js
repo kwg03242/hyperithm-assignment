@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
 import { tradeLogLoader, priceLoader } from '../dataLoader/dataLoader';
 import { tradeLogClass, priceLogClass } from '../classes/logClass'
-import { AvailableDate } from './availableDate'
 import Profit from './profit';
 
 let defaultEditTrade = [];
@@ -69,9 +68,6 @@ export default function TradeLog () {
     }, [])
 
     useEffect (() => {
-        let begin = 0;
-        let end = logs.length - 1;
-
         for(let i = 0; i < logs.length; i++){
             if(logs[i].date - endPoint <= 0){
                 setStartIdx(i);
@@ -103,10 +99,6 @@ export default function TradeLog () {
         if(currentPage < maxPage - 1){
             setCurrentPage((prevPage) => prevPage + 1);
         }
-    }
-
-    const onSetPage = (e) =>{
-        if(e.target.value < maxPage - 1 && e.target.value > 0)setCurrentPage(() => e.target.value - 1);
     }
 
     const onDelete = (idx) =>{
@@ -250,7 +242,7 @@ export default function TradeLog () {
                         <div className="row">
                             <label>날짜:</label>
                             {prices.length > 0 &&
-                                <input onChange={e => onDate(e.target.value)} type="date" defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                <input onChange={e => onDate(e.target.value)} type="date" min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
                             }
                             <label>거래내용:</label>
                             <select onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.side = value; return prev;})}}>
