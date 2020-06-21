@@ -18,6 +18,11 @@ export default function Profit( { logs = [], prices = [] } ) {
     const [isProfitChartOpen, setIsProfitChartOpen] = useState(false);
     const [profitsPage, setProfitsPage] = useState(0);
     const [maxProfitsPage, setMaxProfitsPage] = useState(0);
+    const [numberOfLogsPerPage, setNumberOfLogsPerPage] = useState(10);
+    const [startPoint, setStartPoint] = useState(new Date(0));
+    const [endPoint, setEndPoint] = useState(new Date(Date.now()));
+    const [startIdx, setStartIdx] = useState(0);
+    const [endIdx, setEndIdx] =useState(0);
 
     useEffect(() => {
         let sortedLogs = cloneDeep(logs);
@@ -26,7 +31,6 @@ export default function Profit( { logs = [], prices = [] } ) {
         let btc = currentBtc;
         let duration = 0;
         let profits = [];
-
 
         if(prices.length){
             duration = (prices[prices.length - 1].date - prices[0].date + 1)/unitTime;
@@ -55,13 +59,57 @@ export default function Profit( { logs = [], prices = [] } ) {
         setMaxProfitsPage(Math.ceil(profits.length / 10));
     }, [logs, prices])
 
+    useEffect (() => {
+        for(let i = 0; i < profits.length; i++){
+            if(profits[i].date - startPoint >= 0){
+                setStartIdx(i);
+                break;
+            }
+        }
+
+        for(let i = profits.length - 1; i > -1; i--){
+            if(profits[i].date - endPoint <= 0){
+                setEndIdx(i);
+                break;
+            }
+        }       
+    }, [startPoint, endPoint, profits])
+
+    useEffect(() => {
+        setMaxProfitsPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogsPerPage) : 0);
+        setProfitsPage(0);
+    }, [startIdx, endIdx, numberOfLogsPerPage])
+
     return (
         <>
             <section className="chart-section">
                 <button onClick={() => setIsProfitsOpen(prev => !prev)} className="button">{isProfitsOpen? `손익표 닫기` : `손익표 열기`}</button>
                 <div className={isProfitsOpen? "fadeIn":"fadeOut"}>
-                    {isProfitsOpen === true &&
-                        (profits.slice(profits.length - 10 * (profitsPage + 1) < 0? 0 : profits.length - 10 * (profitsPage + 1), profits.length - 10 * profitsPage)).reverse().map(profit => profit.print())
+                    <div className="row">
+                        <label>표시 개수 
+                            <select onChange={(e) => {
+                                if(profitsPage * Number(e.target.value) > endIdx){setProfitsPage(Math.floor((profits.length - 1) / Number(e.target.value)))};
+                                setNumberOfLogsPerPage(Number(e.target.value));
+                            }}>
+                                <option value={5}>5개</option>
+                                <option value={10} selected>10개</option>
+                                <option value={15}>15개</option>
+                                <option value={20}>20개</option>
+                            </select>
+                        </label>
+                        {prices.length > 0 &&
+                            <>
+                                <label>조회 시작 날짜 
+                                    <input type="date" onChange={e => {setStartPoint(e.target.value? priceDateFormatting(e.target.value) : prices[0].date);}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
+                                </label>
+                                <label>조회 마지막 날짜
+                                    <input type="date" onChange={e => {setEndPoint(e.target.value? priceDateFormatting(e.target.value) : prices[prices.length - 1].date);}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                </label>
+                            </>
+                        }
+                    </div>
+                    {
+                        (profits.slice(endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1) < 0? 0 : endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1), endIdx + 1 - numberOfLogsPerPage * profitsPage)).reverse().map(profit => profit.print())
                     }
                     <div className="row">
                         <div onClick={() => setProfitsPage(prev => prev > 0? prev - 1 : 0)} className="pointer"><TiArrowLeftThick /></div>
@@ -79,4 +127,16 @@ export default function Profit( { logs = [], prices = [] } ) {
             </section>
         </>
     );
+}
+
+const dateToISOString = (date) =>{
+    let out = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
+    return out.toISOString().slice(0, 10);
+}
+
+const priceDateFormatting = (date) =>{
+    let dateArray = date.split('-');
+    let formattedDate = new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
+
+    return formattedDate;
 }

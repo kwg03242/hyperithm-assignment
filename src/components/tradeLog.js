@@ -22,7 +22,7 @@ export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLo
     const [tradeLogsDescending, setTradeLogsDescending] = useState([]);
     const [addTrade, setAddTrade] = useState({"date": null, "side": null, "volume": null});
     const [editTrade, setEditTrade] = useState({"date": null, "side": null, "volume": null});
-    const [numberOfLogPerPage, setNumberOfLogPerPage] = useState(10);
+    const [numberOfLogsPerPage, setNumberOfLogsPerPage] = useState(10);
     const [editIdx, setEditIdx] = useState(-1);
     const [startPoint, setStartPoint] = useState(new Date(0));
     const [endPoint, setEndPoint] = useState(new Date(Date.now()));
@@ -31,8 +31,8 @@ export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLo
 
     useEffect (() => {
         setTradeLogsDescending(tradeLogs);
-        setMaxPage(Math.floor((tradeLogs.length - 1) / numberOfLogPerPage) + 1);
-    }, [tradeLogs, numberOfLogPerPage])
+        setMaxPage(Math.floor((tradeLogs.length - 1) / numberOfLogsPerPage) + 1);
+    }, [tradeLogs, numberOfLogsPerPage])
 
     useEffect(() => {
         if(prices.length > 0){
@@ -58,9 +58,9 @@ export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLo
     }, [startPoint, endPoint, tradeLogsDescending])
 
     useEffect(() => {
-        setMaxPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogPerPage) : 0);
+        setMaxPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogsPerPage) : 0);
         setCurrentPage(0);
-    }, [startIdx, endIdx, numberOfLogPerPage])
+    }, [startIdx, endIdx, numberOfLogsPerPage])
     
     const onPrev = () =>{
         if(currentPage > 0){
@@ -137,8 +137,8 @@ export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLo
                     <div className="row">
                         <label>표시 개수 
                             <select onChange={(e) => {
-                                if(currentPage * Number(e.target.value) > tradeLogsDescending.length - 1){setCurrentPage(Math.floor((tradeLogsDescending.length - 1) / Number(e.target.value)))};
-                                setNumberOfLogPerPage(Number(e.target.value));
+                                if(currentPage * Number(e.target.value) > endIdx){setCurrentPage(Math.floor((tradeLogsDescending.length - 1) / Number(e.target.value)))};
+                                setNumberOfLogsPerPage(Number(e.target.value));
                             }}>
                                 <option value={5}>5개</option>
                                 <option value={10} selected>10개</option>
@@ -159,7 +159,7 @@ export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLo
                     </div>
                     <ul>
                         {tradeLogsDescending.length > 0 &&
-                            tradeLogsDescending.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? endIdx + 1: startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
+                            tradeLogsDescending.slice(startIdx + currentPage * numberOfLogsPerPage, startIdx + currentPage * numberOfLogsPerPage + numberOfLogsPerPage > endIdx? endIdx + 1: startIdx + currentPage * numberOfLogsPerPage + numberOfLogsPerPage).map((log) => {
                                 let idx = log.idx;
                                 return (
                                     <>
