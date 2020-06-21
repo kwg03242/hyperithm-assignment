@@ -65,7 +65,7 @@ export function LineChart( { logs = [], text = '', width = 800, height = 350 } )
         logs.map((log) => data.push({x: log.date, y: Math.floor(log.price)}));
         setBtcData(
             [{
-                name: 'USD/BTC',
+                name: text,
                 data: data
             }]
         )
@@ -120,7 +120,7 @@ export function LineChart( { logs = [], text = '', width = 800, height = 350 } )
             shared: false,
           }
       })
-    }, [logs])
+    }, [logs, text])
 
     return (
         <div id="chart">
