@@ -2,19 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
 import { btcTradeLogs } from '../promises/btcLogs';
 import { tradeLogClass } from '../classes/logClass';
-import { addTradeLog, modifyTradeLog, deleteTradeLog } from '../requests/tradeLogsRequests';
+import { addTradeLog, modifyTradeLog, deleteTradeLog } from '../promises/tradeLogsRequests';
 import Profit from './profit';
 
 let defaultEditTrade = [];
 for(let i = 0; i < 10; i++){
     defaultEditTrade.push({"date": null, "side": null, "volume": null});
-}
-
-const tradeLogDateFormatting = (date) =>{
-    let timeArray = date.split('/');
-    let formattedDate = new Date(timeArray[2], timeArray[0] - 1, timeArray[1]);
-
-    return formattedDate;
 }
 
 const priceDateFormatting = (date) =>{
@@ -24,10 +17,10 @@ const priceDateFormatting = (date) =>{
     return formattedDate;
 }
 
-export default function TradeLog ( { prices = [] } ) {
+export default function TradeLog ( { tradeLogs = [], prices = [], refetchTradeLogs } ) {
     const [currentPage, setCurrentPage] = useState(0);
     const [maxPage, setMaxPage] = useState(0);
-    const [logs, setLogs] = useState([]);
+    const [tradeLogsDescending, setTradeLogsDescending] = useState([]);
     const [addTrade, setAddTrade] = useState({"date": null, "side": null, "volume": null});
     const [editTrade, setEditTrade] = useState({"date": null, "side": null, "volume": null});
     const [numberOfLogPerPage, setNumberOfLogPerPage] = useState(10);
@@ -38,18 +31,9 @@ export default function TradeLog ( { prices = [] } ) {
     const [endIdx, setEndIdx] =useState(0);
 
     useEffect (() => {
-        btcTradeLogs()
-        .then((res) => {
-            let tradeLogs;
-            let unpagedLogs;
-            tradeLogs = JSON.parse(res);
-            let i = 0;
-            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", i++));
-
-            setLogs(unpagedLogs);
-            setMaxPage(Math.floor((unpagedLogs.length - 1) / numberOfLogPerPage) + 1);
-        })
-    }, [])
+        setTradeLogsDescending(tradeLogs);
+        setMaxPage(Math.floor((tradeLogs.length - 1) / numberOfLogPerPage) + 1);
+    }, [tradeLogs, numberOfLogPerPage])
 
     useEffect(() => {
         if(prices.length > 0){
@@ -59,20 +43,20 @@ export default function TradeLog ( { prices = [] } ) {
     }, [prices])
 
     useEffect (() => {
-        for(let i = 0; i < logs.length; i++){
-            if(logs[i].date - endPoint <= 0){
+        for(let i = 0; i < tradeLogsDescending.length; i++){
+            if(tradeLogsDescending[i].date - endPoint <= 0){
                 setStartIdx(i);
                 break;
             }
         }
 
-        for(let i = logs.length - 1; i > -1; i--){
-            if(logs[i].date - startPoint >= 0){
+        for(let i = tradeLogsDescending.length - 1; i > -1; i--){
+            if(tradeLogsDescending[i].date - startPoint >= 0){
                 setEndIdx(i);
                 break;
             }
         }       
-    }, [startPoint, endPoint, logs])
+    }, [startPoint, endPoint, tradeLogsDescending])
 
     useEffect(() => {
         setMaxPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogPerPage) : 0);
@@ -91,22 +75,12 @@ export default function TradeLog ( { prices = [] } ) {
         }
     }
 
-    const refetchTradeLogs = () =>{
-        btcTradeLogs()
-        .then(res =>{
-            let sortedLogs = JSON.parse(res);
-            let i = 0;
-            setLogs(sortedLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", i++)));
-            setMaxPage(Math.floor((sortedLogs.length - 1) / numberOfLogPerPage) + 1);
-        })
-    }
-
     const onDelete = (idx) =>{
         if(window.confirm("삭제하시겠습니까?")){
             deleteTradeLog(idx)
             .then(
                 btcTradeLogs()
-                .then(res =>{
+                .then(() =>{
                     refetchTradeLogs();
                 })
             )
@@ -117,7 +91,7 @@ export default function TradeLog ( { prices = [] } ) {
         if(addTrade.date != null && addTrade.side != null && addTrade.volume != null){
             if(window.confirm("추가하시겠습니까?")){
                 addTradeLog(new tradeLogClass (addTrade.date, addTrade.side, addTrade.volume, "Bitcoin", 0))
-                .then(res => {
+                .then(() => {
                     refetchTradeLogs();
                 })
             }
@@ -132,7 +106,7 @@ export default function TradeLog ( { prices = [] } ) {
     }
 
     const onEdit = (idx) =>{
-        if(idx !== -1)setEditTrade(prev => {prev.date = logs[idx].date; prev.side = logs[idx].side; prev.volume = logs[idx].volume; return prev;})
+        if(idx !== -1)setEditTrade(prev => {prev.date = tradeLogsDescending[idx].date; prev.side = tradeLogsDescending[idx].side; prev.volume = tradeLogsDescending[idx].volume; return prev;})
         setEditIdx(idx);
     }
 
@@ -143,7 +117,7 @@ export default function TradeLog ( { prices = [] } ) {
     const onEditConfirm = (e) =>{
         e.preventDefault();
         if(window.confirm("수정하시겠습니까?")){
-            if(editTrade.date != null && editTrade.side != '' && editTrade.volume != null && !isNaN(editTrade.volume) && editTrade.volume[0] !== '-'){
+            if(editTrade.date !== null && editTrade.side !== '' && editTrade.volume !== null && !isNaN(editTrade.volume) && editTrade.volume[0] !== '-'){
                 modifyTradeLog(new tradeLogClass(editTrade.date, editTrade.side, editTrade.volume, "Bitcoin", 0), Number(e.target.value))
                 .then(res => {
                     refetchTradeLogs();
@@ -164,7 +138,7 @@ export default function TradeLog ( { prices = [] } ) {
                     <div className="row">
                         <label>표시 개수 
                             <select onChange={(e) => {
-                                if(currentPage * Number(e.target.value) > logs.length - 1){setCurrentPage(Math.floor((logs.length - 1) / Number(e.target.value)))};
+                                if(currentPage * Number(e.target.value) > tradeLogsDescending.length - 1){setCurrentPage(Math.floor((tradeLogsDescending.length - 1) / Number(e.target.value)))};
                                 setNumberOfLogPerPage(Number(e.target.value));
                             }}>
                                 <option value={5}>5개</option>
@@ -185,8 +159,8 @@ export default function TradeLog ( { prices = [] } ) {
                         }
                     </div>
                     <ul>
-                        {logs.length > 0 &&
-                            logs.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? endIdx + 1: startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
+                        {tradeLogsDescending.length > 0 &&
+                            tradeLogsDescending.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? endIdx + 1: startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
                                 let idx = log.idx;
                                 return (
                                     <>
@@ -200,13 +174,13 @@ export default function TradeLog ( { prices = [] } ) {
                                         {idx === editIdx &&
                                             <div className="row">
                                                 <form>
-                                                    <input type="date" onChange={e => {onEditDate(e.target.value);}} defaultValue={dateToISOString(logs[idx].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
-                                                    <select onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.side = value; return prev;});}} defaultValue={logs[idx].side}>
+                                                    <input type="date" onChange={e => {onEditDate(e.target.value);}} defaultValue={dateToISOString(tradeLogsDescending[idx].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                                    <select onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.side = value; return prev;});}} defaultValue={tradeLogsDescending[idx].side}>
                                                         <option value="">거래내용</option>
                                                         <option value="buy">구매</option>
                                                         <option value="sell">판매</option>
                                                     </select>
-                                                    <input type="text" onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.volume = value; return prev;});}} size="6" defaultValue={logs[idx].volume}/>
+                                                    <input type="text" onChange={e => {let value = e.target.value; setEditTrade(prev => {prev.volume = value; return prev;});}} size="6" defaultValue={tradeLogsDescending[idx].volume}/>
                                                 </form>
                                                 <button onClick={onEditConfirm} value={idx}>확인</button>
                                                 <button onClick={() => onEdit(-1)}>취소</button>
@@ -216,7 +190,7 @@ export default function TradeLog ( { prices = [] } ) {
                                 );
                             })
                         }
-                        {logs.length === 0 &&
+                        {tradeLogsDescending.length === 0 &&
                             <div>거래 내역이 없습니다.</div>
                         }
                     </ul>
@@ -228,22 +202,23 @@ export default function TradeLog ( { prices = [] } ) {
                         <div className="row">
                             <label>날짜:</label>
                             {prices.length > 0 &&
-                                <input onChange={e => onDate(e.target.value)} type="date" min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                <>
+                                    <input onChange={e => onDate(e.target.value)} type="date" min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                    <label>거래내용:</label>
+                                    <select onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.side = value; return prev;})}}>
+                                        <option value="">거래내용</option>
+                                        <option value="buy">구매</option>
+                                        <option value="sell">판매</option>
+                                    </select>
+                                    <label>개수:</label>
+                                    <input type="text" onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.volume = Number(value); return prev;})}} size="6" />
+                                    <div className="pointer" onClick={onAdd}><TiPlus /></div>
+                                </>
                             }
-                            <label>거래내용:</label>
-                            <select onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.side = value; return prev;})}}>
-                                <option value="">거래내용</option>
-                                <option value="buy">구매</option>
-                                <option value="sell">판매</option>
-                            </select>
-                            <label>개수:</label>
-                            <input type="text" onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.volume = Number(value); return prev;})}} size="6" />
-                            <div className="pointer" onClick={onAdd}><TiPlus /></div>
                         </div>
                     </form>
                 </div>
             </section>
-            <Profit logs={logs} prices={prices} />
         </>
     );
 }

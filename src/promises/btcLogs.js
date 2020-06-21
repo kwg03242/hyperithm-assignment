@@ -17,7 +17,7 @@ export function btcValueLogs() {
     return (
         new Promise((resolve, reject) => {
             setTimeout(() =>{
-                resolve(require('../data/bitcoin_price.json'));
+                resolve(JSON.stringify(require('../data/bitcoin_price.json')));
             }, 300)
         })
     );
