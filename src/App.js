@@ -3,18 +3,28 @@ import TradeLog from './components/tradeLog';
 import './components/general.css'
 import './App.css';
 import { LineChart } from './components/lineChart'
-import { priceLoader } from './dataLoader/dataLoader';
 import { priceLogClass } from './classes/logClass'
+import { btcValueLogs } from './promises/btcLogs';
+
+const priceDateFormatting = (date) =>{
+  let dateArray = date.split('-');
+  let formattedDate = new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
+
+  return formattedDate;
+}
 
 function App() {
   const [pricesOfBitcoin, setPriceOfBitcoin] = useState([]);
   const [openChart, setOpenChart] = useState(true);
 
   useEffect(() =>{
-    let priceData = priceLoader();
-    let sortedBitcoinPrices = priceData.map((log) => new priceLogClass(new Date(log.Date), log.Coin, log.Price, log.Volume));
-    sortedBitcoinPrices.sort((a, b) => a.date - b.date);
-    setPriceOfBitcoin(sortedBitcoinPrices);
+    btcValueLogs()
+    .then(res =>{
+      let priceData = res;
+      let sortedBitcoinPrices = priceData.map((log) => new priceLogClass(priceDateFormatting(log.Date), log.Coin, log.Price, log.Volume));
+      sortedBitcoinPrices.sort((a, b) => a.date - b.date);
+      setPriceOfBitcoin(sortedBitcoinPrices);
+    })
   }, [])
 
   return (
@@ -22,7 +32,7 @@ function App() {
       <section className="menu-section">
         <h2 className="center">Bitcoin Trading Info</h2>
       </section>
-      <TradeLog />
+      <TradeLog prices={pricesOfBitcoin}/>
       <section className="chart-section">
         <div className="center">
           <button onClick={() => {setOpenChart(prev => !prev);setPriceOfBitcoin(pricesOfBitcoin);}} className="center">{openChart? `차트 닫기` : `차트 열기`}</button>

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
-import { tradeLogLoader, priceLoader } from '../dataLoader/dataLoader';
-import { btcTradeLogs, btcValueLogs } from '../promises/btcLogs';
-import { tradeLogClass, priceLogClass } from '../classes/logClass';
+import { btcTradeLogs } from '../promises/btcLogs';
+import { tradeLogClass } from '../classes/logClass';
 import { addTradeLog, modifyTradeLog, deleteTradeLog } from '../requests/tradeLogsRequests';
 import Profit from './profit';
 
@@ -25,16 +24,15 @@ const priceDateFormatting = (date) =>{
     return formattedDate;
 }
 
-export default function TradeLog () {
+export default function TradeLog ( { prices = [] } ) {
     const [currentPage, setCurrentPage] = useState(0);
     const [maxPage, setMaxPage] = useState(0);
     const [logs, setLogs] = useState([]);
     const [addTrade, setAddTrade] = useState({"date": null, "side": null, "volume": null});
     const [editTrade, setEditTrade] = useState({"date": null, "side": null, "volume": null});
-    const [prices, setPrices] = useState([]);
     const [numberOfLogPerPage, setNumberOfLogPerPage] = useState(10);
     const [editIdx, setEditIdx] = useState(-1);
-    const [startPoint, setStartPoint] = useState(new Date(Date.now()));
+    const [startPoint, setStartPoint] = useState(new Date(0));
     const [endPoint, setEndPoint] = useState(new Date(Date.now()));
     const [startIdx, setStartIdx] = useState(0);
     const [endIdx, setEndIdx] =useState(0);
@@ -50,15 +48,15 @@ export default function TradeLog () {
 
             setLogs(unpagedLogs);
             setMaxPage(Math.floor((unpagedLogs.length - 1) / numberOfLogPerPage) + 1);
-
-            let priceLogs = priceLoader();
-            let sortedPrices = priceLogs.map((log) => new priceLogClass(priceDateFormatting(log.Date), log.Coin, log.Price, log.Volume));
-            sortedPrices.sort((a, b) => a.date - b.date);
-            setPrices(sortedPrices);  
-            setStartPoint(sortedPrices[0].date);
-            setEndPoint(sortedPrices[sortedPrices.length - 1].date);
         })
     }, [])
+
+    useEffect(() => {
+        if(prices.length > 0){
+            setEndPoint(prices[prices.length - 1].date);
+            setStartPoint(prices[0].date);
+        }
+    }, [prices])
 
     useEffect (() => {
         for(let i = 0; i < logs.length; i++){

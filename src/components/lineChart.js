@@ -20,14 +20,10 @@ export function LineChart( { logs = [], text = '', width = 800, height = 350 } )
             autoScaleYaxis: true,
           },
           toolbar: {
-            autoSelected: 'zoom'
-          },
-
-          toolbar: {
+            autoSelected: 'zoom',
             tools: {
               download: false,
             },
-            autoSelected: 'zoom' 
           },
         },
 
@@ -80,14 +76,10 @@ export function LineChart( { logs = [], text = '', width = 800, height = 350 } )
               autoScaleYaxis: true,
             },
             toolbar: {
-              autoSelected: 'zoom'
-            },
-  
-            toolbar: {
+              autoSelected: 'zoom',
               tools: {
                 download: false,
               },
-              autoSelected: 'zoom' 
             },
           },
   
