@@ -6,6 +6,7 @@
     display: flex;
     align-content: center;
     flex-direction: column;
+    margin-bottom: 5%;
 }
 
 .chart-section.hide {
@@ -31,5 +32,4 @@
 .fadeIn{
     opacity:1;
     transition: width 0.5s, height 0.5s, opacity 0.5s 0.5s;
-
 }
