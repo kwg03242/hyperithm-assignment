@@ -3,7 +3,6 @@ import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "r
 import { btcTradeLogs } from '../promises/btcLogs';
 import { tradeLogClass } from '../classes/logClass';
 import { addTradeLog, modifyTradeLog, deleteTradeLog } from '../promises/tradeLogsRequests';
-import Profit from './profit';
 
 let defaultEditTrade = [];
 for(let i = 0; i < 10; i++){
