@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
 import { tradeLogLoader, priceLoader } from '../dataLoader/dataLoader';
-import { tradeLogClass, priceLogClass } from '../classes/logClass'
+import { btcTradeLogs, btcValueLogs } from '../promises/tradeLogs';
+import { tradeLogClass, priceLogClass } from '../classes/logClass';
+import { addTradeLog } from '../requests/tradeLogsRequests';
 import Profit from './profit';
 
 let defaultEditTrade = [];
 for(let i = 0; i < 10; i++){
     defaultEditTrade.push({"date": null, "side": null, "volume": null});
 }
-
 
 const tradeLogDateFormatting = (date) =>{
     let timeArray = date.split('/');
@@ -34,37 +35,30 @@ export default function TradeLog () {
     const [prices, setPrices] = useState([]);
     const [numberOfLogPerPage, setNumberOfLogPerPage] = useState(10);
     const [editIdx, setEditIdx] = useState(-1);
-    const [startPoint, setStartPoint] = useState(0);
-    const [endPoint, setEndPoint] = useState(0);
+    const [startPoint, setStartPoint] = useState(new Date(Date.now()));
+    const [endPoint, setEndPoint] = useState(new Date(Date.now()));
     const [startIdx, setStartIdx] = useState(0);
     const [endIdx, setEndIdx] =useState(0);
 
     useEffect (() => {
-        let idx = 0;
-        let tradeLogs;
-        let unpagedLogs;
-        if(!localStorage.getItem("tradeLogs")){
-            tradeLogs = tradeLogLoader();
-            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0));
-        }
-        else {
-            tradeLogs = JSON.parse(localStorage.getItem("tradeLogs"));
-            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(new Date(log.date), log.side, log.volume, "Bitcoin", 0));
-        }
-        unpagedLogs.sort((a, b) => b.date - a.date);
-        for(let i = 0; i < unpagedLogs.length; i++){
-            unpagedLogs[i].idx = idx++;
-        }
-        setLogs(unpagedLogs);
-        setMaxPage(Math.floor((unpagedLogs.length - 1) / numberOfLogPerPage) + 1);
-        let priceLogs = priceLoader();
-        let sortedPrices = priceLogs.map((log) => new priceLogClass(priceDateFormatting(log.Date), log.Coin, log.Price, log.Volume));
-        sortedPrices.sort((a, b) => a.date - b.date);
-        setPrices(sortedPrices);  
-
-        setStartPoint(sortedPrices[0].date);
-        setEndPoint(sortedPrices[sortedPrices.length - 1].date);
-        
+        btcTradeLogs()
+        .then((res) => {
+            let tradeLogs;
+            let unpagedLogs;
+            tradeLogs = JSON.parse(res);
+            let i = 0;
+            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", i++));
+            setLogs(unpagedLogs);
+            setMaxPage(Math.floor((unpagedLogs.length - 1) / numberOfLogPerPage) + 1);
+            
+            let priceLogs = priceLoader();
+            let sortedPrices = priceLogs.map((log) => new priceLogClass(priceDateFormatting(log.Date), log.Coin, log.Price, log.Volume));
+            sortedPrices.sort((a, b) => a.date - b.date);
+            setPrices(sortedPrices);  
+            setStartPoint(sortedPrices[0].date);
+            setEndPoint(sortedPrices[sortedPrices.length - 1].date);
+        })
+        console.log(1);
     }, [])
 
     useEffect (() => {
@@ -81,12 +75,12 @@ export default function TradeLog () {
                 break;
             }
         }       
-        localStorage.setItem("tradeLogs", JSON.stringify(logs));
     }, [startPoint, endPoint, logs])
 
     useEffect(() => {
         setMaxPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogPerPage) : 0);
         setCurrentPage(0);
+        console.log(3);
     }, [startIdx, endIdx, numberOfLogPerPage])
     
     const onPrev = () =>{
@@ -116,15 +110,17 @@ export default function TradeLog () {
     const onAdd = () =>{
         if(addTrade.date != null && addTrade.side != null && addTrade.volume != null){
             if(window.confirm("추가하시겠습니까?")){
-                let prevLogs = logs;
-
-                prevLogs.push(new tradeLogClass (addTrade.date, addTrade.side, addTrade.volume, "Bitcoin", 0));
-                prevLogs.sort((a, b) => b.date - a.date);
-                for(let i =0; i < prevLogs.length; i++){
-                    prevLogs[i].idx = i;
-                }
-                setLogs(cloneDeep(prevLogs));
-                setMaxPage(Math.floor((prevLogs.length - 1) / numberOfLogPerPage) + 1);
+                addTradeLog(new tradeLogClass (addTrade.date, addTrade.side, addTrade.volume, "Bitcoin", 0))
+                .then(res => {
+                    btcTradeLogs()
+                    .then(res =>{
+                        let sortedLogs = res;
+                        sortedLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0));
+                        setLogs(res.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0)));
+                        setMaxPage(Math.floor((res.length - 1) / numberOfLogPerPage) + 1);
+                        console.log(res);
+                    })
+                })
             }
         }
         else {
@@ -133,7 +129,6 @@ export default function TradeLog () {
     }
 
     const onDate = (date) =>{
-        console.log(date, typeof(date));
         setAddTrade(prev => {prev.date = priceDateFormatting(date); return prev;})
     }
 
@@ -166,9 +161,6 @@ export default function TradeLog () {
             }
         }
     }  
-
-    console.log(startPoint, endPoint);
-    console.log(startIdx, endIdx, maxPage, currentPage);
 
     return (
         <>
