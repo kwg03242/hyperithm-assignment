@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { profitClass } from '../classes/logClass'
-import { ProfitChart } from './chart';
 import { LineChart } from './lineChart';
 
 const millisecPerDay = 1000 * 60 * 60 * 24;
