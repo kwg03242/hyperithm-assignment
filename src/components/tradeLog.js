@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TiDelete, TiEdit, TiArrowLeftThick, TiArrowRightThick, TiPlus } from "react-icons/ti";
 import { tradeLogLoader, priceLoader } from '../dataLoader/dataLoader';
-import { btcTradeLogs, btcValueLogs } from '../promises/tradeLogs';
+import { btcTradeLogs, btcValueLogs } from '../promises/btcLogs';
 import { tradeLogClass, priceLogClass } from '../classes/logClass';
 import { addTradeLog, modifyTradeLog, deleteTradeLog } from '../requests/tradeLogsRequests';
 import Profit from './profit';
@@ -26,7 +26,6 @@ const priceDateFormatting = (date) =>{
 }
 
 export default function TradeLog () {
-    var cloneDeep = require('lodash.clonedeep');
     const [currentPage, setCurrentPage] = useState(0);
     const [maxPage, setMaxPage] = useState(0);
     const [logs, setLogs] = useState([]);
@@ -179,10 +178,10 @@ export default function TradeLog () {
                         {prices.length > 0 &&
                             <>
                                 <label>조회 시작 날짜 
-                                    <input type="date" onChange={e => {setStartPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
+                                    <input type="date" onChange={e => {setStartPoint(e.target.value? priceDateFormatting(e.target.value) : prices[0].date);}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
                                 </label>
                                 <label>조회 마지막 날짜
-                                    <input type="date" onChange={e => {setEndPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                    <input type="date" onChange={e => {setEndPoint(e.target.value? priceDateFormatting(e.target.value) : prices[prices.length - 1].date);}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
                                 </label>
                             </>
                         }
