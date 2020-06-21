@@ -11,8 +11,8 @@ input{
 }
 
 .background{
-    margin-top: 5%;
-    margin-bottom: 5%;
+    margin-top: 2.5%;
+    margin-bottom: 2.5%;
 }
 
 .title{
@@ -53,10 +53,10 @@ input{
 }
 
 .trade-log-wrapper{
+    border-radius: 15px;
     width: 800px;
     margin-left: auto;
     margin-right: auto;
-    background-color: aqua;
     padding-left: 20px;
     padding-right: 20px;
     padding-top: 20px;

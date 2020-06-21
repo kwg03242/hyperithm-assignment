@@ -1,12 +1,40 @@
+.button {
+    background-color: #4CAF50; /* Green */
+    border: solid;
+    color: white;
+    padding: 16px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    transition-duration: 0.4s;
+    cursor: pointer;
+}
+
+.button:hover {
+    background-color: white;
+    color: #4CAF50;
+    border: solid;
+}
+
 .menu-section{
     height: 100px;
 }
 
 .chart-section{
+    border-radius: 15px;
+    width: 800px;
     display: flex;
     align-content: center;
     flex-direction: column;
-    margin-bottom: 5%;
+    margin-bottom: 2.5%;
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .chart-section.hide {
