@@ -8,7 +8,7 @@ import { priceLogClass } from './classes/logClass'
 
 function App() {
   const [pricesOfBitcoin, setPriceOfBitcoin] = useState([]);
-  const [openChart, setOpenChart] = useState(false);
+  const [openChart, setOpenChart] = useState(true);
 
   useEffect(() =>{
     let priceData = priceLoader();
@@ -22,6 +22,7 @@ function App() {
       <section className="menu-section">
         <h2 className="center">Bitcoin Trading Info</h2>
       </section>
+      <TradeLog />
       <section className="chart-section">
         <div className="center">
           <button onClick={() => {setOpenChart(prev => !prev);setPriceOfBitcoin(pricesOfBitcoin);}} className="center">{openChart? `차트 닫기` : `차트 열기`}</button>
@@ -32,7 +33,6 @@ function App() {
           </div>
         </div>
       </section>
-      <TradeLog />
     </>
   );
 }
