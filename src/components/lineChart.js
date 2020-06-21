@@ -62,7 +62,7 @@ export function LineChart( { logs = [], text = '', width = 800, height = 350 } )
     });
 
     useEffect(() =>{
-        logs.map((log) => data.push({x: log.date, y: log.price}));
+        logs.map((log) => data.push({x: log.date, y: Math.floor(log.price)}));
         setBtcData(
             [{
                 name: 'USD/BTC',
