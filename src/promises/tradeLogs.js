@@ -1,5 +1,3 @@
-import { local } from 'd3';
-
 export function btcTradeLogs() {
     return (
         new Promise((resolve, reject) => {
