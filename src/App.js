@@ -59,7 +59,7 @@ function App() {
   return (
     <>
       <section className="menu-section">
-        <h2 className="center">Bitcoin Trading Info</h2>
+        <h2 className="head">Bitcoin Trading Info</h2>
       </section>
       <section className="chart-section">
         <button onClick={() => setOpenChart(prev => !prev)} className="button">{openChart? `Bitcoin 차트 닫기` : `Bitcoin 차트 열기`}</button>

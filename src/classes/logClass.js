@@ -13,7 +13,7 @@ export class tradeLogClass {
     print() {
         return (
             <li className="trade-log">
-                <div className="trade-log-date">{this.date.getFullYear()}.{this.date.getMonth() + 1}.{this.date.getDate()}</div>
+                <div className="trade-log-date">{dateToISOString(this.date).slice(0, 10)}</div>
                 <div className="trade-log-side">{this.side}</div> 
                 <div className="trade-log-volume">{this.volume} {coinToUnit(this.coin)}</div>
             </li>
@@ -48,12 +48,12 @@ export class profitClass {
 
     print = () => {
         return (
-                <div className="row">
+                <li className="profit-form">
                     <div className="date-of-profit">{dateToISOString(this.date).slice(0, 10)}</div>
                     <div className="btc-of-profit">보유 Bitcoin: {new Intl.NumberFormat().format(this.btc)} BTC</div>
                     <div className="usd-of-profit">보유 현금: {new Intl.NumberFormat().format(this.cash)} $</div>
                     <div className="profit-of-profit">Profit: {new Intl.NumberFormat().format(this.profit)} $</div>
-                </div>
+                </li>
         );
     }
 }
