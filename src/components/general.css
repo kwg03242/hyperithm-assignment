@@ -31,7 +31,13 @@ input{
     flex-direction: row;
     width: 300px;
     margin-right: 20px;
+    animation: fadeIn 1s;
 }
+
+@keyframes fadeIn {
+    from {opacity: 0;}
+    to {opacity: 1;}
+  }
 
 .trade-log-date{
     width: 150px;
@@ -50,7 +56,11 @@ input{
     width: 800px;
     margin-left: auto;
     margin-right: auto;
-    
+    background-color: aqua;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
 
 .pointer{
