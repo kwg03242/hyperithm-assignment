@@ -42,8 +42,16 @@ export default function TradeLog () {
 
     useEffect (() => {
         let idx = 0;
-        let tradeLogs = tradeLogLoader(); 
-        let unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0));
+        let tradeLogs;
+        let unpagedLogs;
+        if(!localStorage.getItem("tradeLogs")){
+            tradeLogs = tradeLogLoader();
+            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(tradeLogDateFormatting(log.time), log.side, log.volume, "Bitcoin", 0));
+        }
+        else {
+            tradeLogs = JSON.parse(localStorage.getItem("tradeLogs"));
+            unpagedLogs = tradeLogs.map((log) => new tradeLogClass(new Date(log.date), log.side, log.volume, "Bitcoin", 0));
+        }
         unpagedLogs.sort((a, b) => b.date - a.date);
         for(let i = 0; i < unpagedLogs.length; i++){
             unpagedLogs[i].idx = idx++;
@@ -57,6 +65,7 @@ export default function TradeLog () {
 
         setStartPoint(sortedPrices[0].date);
         setEndPoint(sortedPrices[sortedPrices.length - 1].date);
+        
     }, [])
 
     useEffect (() => {
@@ -65,7 +74,7 @@ export default function TradeLog () {
 
         for(let i = 0; i < logs.length; i++){
             if(logs[i].date - endPoint <= 0){
-                setStartIdx(i);console.log(logs[i].date, endPoint);
+                setStartIdx(i);
                 break;
             }
         }
@@ -76,10 +85,12 @@ export default function TradeLog () {
                 break;
             }
         }       
+        localStorage.setItem("tradeLogs", JSON.stringify(logs));
     }, [startPoint, endPoint, logs])
 
     useEffect(() => {
-        setMaxPage(Math.ceil((endIdx - startIdx) / numberOfLogPerPage));
+        setMaxPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogPerPage) : 0);
+        setCurrentPage(0);
     }, [startIdx, endIdx, numberOfLogPerPage])
     
     const onPrev = () =>{
@@ -130,7 +141,8 @@ export default function TradeLog () {
     }
 
     const onDate = (date) =>{
-        setAddTrade(prev => {prev.date = new priceDateFormatting(date); return prev;})
+        console.log(date, typeof(date));
+        setAddTrade(prev => {prev.date = priceDateFormatting(date); return prev;})
     }
 
     const onEdit = (idx) =>{
@@ -163,6 +175,9 @@ export default function TradeLog () {
         }
     }  
 
+    console.log(startPoint, endPoint);
+    console.log(startIdx, endIdx, maxPage, currentPage);
+
     return (
         <>
             <section className="background">
@@ -183,17 +198,17 @@ export default function TradeLog () {
                         {prices.length > 0 &&
                             <>
                                 <label>조회 시작 날짜 
-                                    <input type="date" onChange={e => {setStartPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                    <input type="date" onChange={e => {setStartPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
                                 </label>
                                 <label>조회 마지막 날짜
-                                    <input type="date" onChange={e => {setEndPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                    <input type="date" onChange={e => {setEndPoint(priceDateFormatting(e.target.value));}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
                                 </label>
                             </>
                         }
                     </div>
                     <ul>
                         {logs.length > 0 &&
-                            logs.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? startIdx + endIdx : startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
+                            logs.slice(startIdx + currentPage * numberOfLogPerPage, startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage > endIdx? endIdx + 1: startIdx + currentPage * numberOfLogPerPage + numberOfLogPerPage).map((log) => {
                                 let idx = log.idx;
                                 return (
                                     <>
@@ -238,13 +253,13 @@ export default function TradeLog () {
                                 <input onChange={e => onDate(e.target.value)} type="date" defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(prices[prices.length - 1].date)} />
                             }
                             <label>거래내용:</label>
-                            <select onChange={(e) => setAddTrade(prev => {prev.side = e.target.value; return prev;})}>
+                            <select onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.side = value; return prev;})}}>
                                 <option value="">거래내용</option>
                                 <option value="buy">구매</option>
                                 <option value="sell">판매</option>
                             </select>
                             <label>개수:</label>
-                            <input type="text" onChange={(e) => setAddTrade(prev => {prev.volume = Number(e.target.value); return prev;})} size="6" />
+                            <input type="text" onChange={(e) => {let value = e.target.value; setAddTrade(prev => {prev.volume = Number(value); return prev;})}} size="6" />
                             <div className="pointer" onClick={onAdd}><TiPlus /></div>
                         </div>
                     </form>
