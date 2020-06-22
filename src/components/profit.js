@@ -118,7 +118,7 @@ export default function Profit( { logs = [], prices = [] } ) {
                         </label>
                         {prices.length > 0 &&
                             <>
-                                <label>조회 시작 날짜 
+                                <label>기준 날짜 
                                     <input type="date" onChange={e => {setStartPoint(e.target.value? priceDateFormatting(e.target.value) : prices[0].date);}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
                                 </label>
                                 <label>조회 마지막 날짜
