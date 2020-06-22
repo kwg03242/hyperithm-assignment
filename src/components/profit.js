@@ -20,9 +20,10 @@ export default function Profit( { logs = [], prices = [] } ) {
     const [maxProfitsPage, setMaxProfitsPage] = useState(0);
     const [numberOfLogsPerPage, setNumberOfLogsPerPage] = useState(10);
     const [startPoint, setStartPoint] = useState(new Date(0));
-    const [endPoint, setEndPoint] = useState(new Date(Date.now()));
+    const [endPoint, setEndPoint] = useState(new Date(0));
     const [startIdx, setStartIdx] = useState(0);
-    const [endIdx, setEndIdx] =useState(0);
+    const [endIdx, setEndIdx] = useState(0);
+    const [rangedProfit, setRangedProfit] = useState([]);
 
     useEffect(() => {
         let sortedLogs = cloneDeep(logs);
@@ -32,9 +33,15 @@ export default function Profit( { logs = [], prices = [] } ) {
         let duration = 0;
         let profits = [];
 
+        if(prices.length > 0){
+            setStartPoint(prices[0].date);
+            setEndPoint(prices[prices.length - 1].date);
+        }
+
         if(prices.length){
             duration = (prices[prices.length - 1].date - prices[0].date + 1)/unitTime;
         }
+
         let j = 0;
         let i = 0;
         
@@ -58,7 +65,7 @@ export default function Profit( { logs = [], prices = [] } ) {
         setChartData(profits.map(profit => {return {"date": profit.date, "price": profit.profit}}))
         setMaxProfitsPage(Math.ceil(profits.length / 10));
     }, [logs, prices])
-
+    
     useEffect (() => {
         for(let i = 0; i < profits.length; i++){
             if(profits[i].date - startPoint >= 0){
@@ -76,9 +83,19 @@ export default function Profit( { logs = [], prices = [] } ) {
     }, [startPoint, endPoint, profits])
 
     useEffect(() => {
+        console.log(profits);
+        console.log(startIdx, endIdx)
+        let rangedProfits = [];
+        let initProfit = profits[startIdx];
+        for(let i = 0; i < endIdx - startIdx; i++){
+            rangedProfits.push(new profitClass(profits[i + startIdx].date, profits[i + startIdx].btc, profits[i + startIdx].cash, profits[i + startIdx].profit - initProfit.profit))
+        }
+        setChartData(rangedProfits.map(rangedProfit => {return {"date": rangedProfit.date, "price": rangedProfit.profit}}))
+
         setMaxProfitsPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogsPerPage) : 0);
+        setRangedProfit(rangedProfits);
         setProfitsPage(0);
-    }, [startIdx, endIdx, numberOfLogsPerPage])
+    }, [startIdx, endIdx, numberOfLogsPerPage, profits])
 
     return (
         <>
