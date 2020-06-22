@@ -22,7 +22,7 @@ export default function Profit( { logs = [], prices = [] } ) {
     const [startPoint, setStartPoint] = useState(new Date(0));
     const [endPoint, setEndPoint] = useState(new Date(0));
     const [startIdx, setStartIdx] = useState(0);
-    const [endIdx, setEndIdx] = useState(0);
+    const [endIdx, setEndIdx] = useState(-1);
     const [rangedProfit, setRangedProfit] = useState([]);
 
     useEffect(() => {
@@ -61,6 +61,7 @@ export default function Profit( { logs = [], prices = [] } ) {
             profits.push(new profitClass(prices[i].date, btc, cash, btc * prices[i].price + cash - initialBtc * prices[0].price - initialCash));
             if(prices[i].date.getTime() === prices[0].date.getTime() + k * unitTime)i++;
         }
+        console.log(1);
         setProfits(profits);
         setChartData(profits.map(profit => {return {"date": profit.date, "price": profit.profit}}))
         setMaxProfitsPage(Math.ceil(profits.length / 10));
@@ -80,22 +81,23 @@ export default function Profit( { logs = [], prices = [] } ) {
                 break;
             }
         }       
+        console.log(2);
     }, [startPoint, endPoint, profits])
 
     useEffect(() => {
-        console.log(profits);
-        console.log(startIdx, endIdx)
         let rangedProfits = [];
         let initProfit = profits[startIdx];
-        for(let i = 0; i < endIdx - startIdx; i++){
+        for(let i = 0; i < endIdx - startIdx + 1; i++){
             rangedProfits.push(new profitClass(profits[i + startIdx].date, profits[i + startIdx].btc, profits[i + startIdx].cash, profits[i + startIdx].profit - initProfit.profit))
         }
         setChartData(rangedProfits.map(rangedProfit => {return {"date": rangedProfit.date, "price": rangedProfit.profit}}))
-
+        console.log(rangedProfits);
         setMaxProfitsPage(endIdx - startIdx >= 0 ? Math.ceil((endIdx - startIdx + 1) / numberOfLogsPerPage) : 0);
         setRangedProfit(rangedProfits);
         setProfitsPage(0);
     }, [startIdx, endIdx, numberOfLogsPerPage, profits])
+
+    console.log(rangedProfit);
 
     return (
         <>
@@ -120,13 +122,13 @@ export default function Profit( { logs = [], prices = [] } ) {
                                     <input type="date" onChange={e => {setStartPoint(e.target.value? priceDateFormatting(e.target.value) : prices[0].date);}} defaultValue={dateToISOString(prices[0].date)} min={dateToISOString(prices[0].date)} max={dateToISOString(endPoint)} />
                                 </label>
                                 <label>조회 마지막 날짜
-                                    <input type="date" onChange={e => {setEndPoint(e.target.value? priceDateFormatting(e.target.value) : prices[prices.length - 1].date);}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
+                                  <input type="date" onChange={e => {setEndPoint(e.target.value? priceDateFormatting(e.target.value) : prices[prices.length - 1].date);}} defaultValue={dateToISOString(prices[prices.length - 1].date)} min={dateToISOString(startPoint)} max={dateToISOString(prices[prices.length - 1].date)} />
                                 </label>
                             </>
                         }
                     </div>
                     {
-                        (profits.slice(endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1) < 0? 0 : endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1), endIdx + 1 - numberOfLogsPerPage * profitsPage)).reverse().map(profit => profit.print())
+                        rangedProfit.slice(rangedProfit.length - numberOfLogsPerPage * (profitsPage + 1) < 0? 0 : rangedProfit.length - numberOfLogsPerPage * (profitsPage + 1), rangedProfit.length - numberOfLogsPerPage * profitsPage).reverse().map(profit => profit.print())
                     }
                     <div className="row">
                         <div onClick={() => setProfitsPage(prev => prev > 0? prev - 1 : 0)} className="pointer"><TiArrowLeftThick /></div>
@@ -156,4 +158,5 @@ const priceDateFormatting = (date) =>{
     let formattedDate = new Date(dateArray[0], dateArray[1] - 1, dateArray[2]);
 
     return formattedDate;
-}
+}                        
+/* (profits.slice(endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1) < startIdx? startIdx : endIdx + 1 - numberOfLogsPerPage * (profitsPage + 1), endIdx + 1 - numberOfLogsPerPage * profitsPage)).reverse().map(profit => profit.print()) */
