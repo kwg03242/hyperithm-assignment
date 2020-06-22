@@ -2,8 +2,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Missing bitcoin_price data while (2019.03.20~2019.03.31)
 
-## Backlog
-AvailableDate function select bug
+1. npm install
+2. npm start
+
+local storage를 이용해서 데이터를 유지하기에 오류 발생시 local storage 삭제 후 새로고침
 
 ## Available Scripts
 
